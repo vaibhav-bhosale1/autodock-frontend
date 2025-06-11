@@ -14,7 +14,7 @@ function App() {
 
   const fetchStatus = async () => {
     try {
-      const response = await axios.get('/api/status');
+      const response = await axios.get('http://34.201.136.101:5000/api/status');
       setStatus(response.data);
     } catch (error) {
       console.error('Error fetching status:', error);
@@ -23,7 +23,7 @@ function App() {
 
   const fetchProjects = async () => {
     try {
-      const response = await axios.get('/api/projects');
+      const response = await axios.get('http://34.201.136.101:5000/api/projects');
       setProjects(response.data);
       setLoading(false);
     } catch (error) {
@@ -34,7 +34,7 @@ function App() {
 
   const handleDeploy = async (projectId) => {
     try {
-      const response = await axios.post('/api/deploy', { projectId });
+      const response = await axios.post('http://34.201.136.101:5000/api/deploy', { projectId });
       setDeployments({
         ...deployments,
         [projectId]: response.data
