@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 const API_BASE_URL = 'http://34.201.136.101:5000';
 
@@ -10,15 +10,61 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchAllData();
-    
-    // Refresh data every 30 seconds
-    const interval = setInterval(fetchAllData, 30000);
-    return () => clearInterval(interval);
-  }, []);
+  const fetchStatus = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/status`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        mode: 'cors'
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      const data = await response.json();
+      setStatus(data);
+    } catch (error) {
+      console.error('Error fetching status:', error);
+      throw error;
+    }
+  };
 
-  const fetchAllData = async () => {
+  const fetchProjects = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/projects`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        mode: 'cors'
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      const data = await response.json();
+      setProjects(data);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      throw error;
+    }
+  };
+
+  const fetchSystemInfo = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/system`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        mode: 'cors'
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      const data = await response.json();
+      setSystemInfo(data);
+    } catch (error) {
+      console.error('Error fetching system info:', error);
+      // Don't throw here as system info is not critical
+    }
+  };
+
+  const fetchAllData = useCallback(async () => {
     try {
       await Promise.all([
         fetchStatus(),
@@ -32,43 +78,15 @@ function App() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchStatus = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/status`);
-      if (!response.ok) throw new Error('Failed to fetch status');
-      const data = await response.json();
-      setStatus(data);
-    } catch (error) {
-      console.error('Error fetching status:', error);
-      throw error;
-    }
-  };
-
-  const fetchProjects = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/projects`);
-      if (!response.ok) throw new Error('Failed to fetch projects');
-      const data = await response.json();
-      setProjects(data);
-    } catch (error) {
-      console.error('Error fetching projects:', error);
-      throw error;
-    }
-  };
-
-  const fetchSystemInfo = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/system`);
-      if (!response.ok) throw new Error('Failed to fetch system info');
-      const data = await response.json();
-      setSystemInfo(data);
-    } catch (error) {
-      console.error('Error fetching system info:', error);
-      // Don't throw here as system info is not critical
-    }
-  };
+  useEffect(() => {
+    fetchAllData();
+    
+    // Refresh data every 30 seconds
+    const interval = setInterval(fetchAllData, 30000);
+    return () => clearInterval(interval);
+  }, [fetchAllData]);
 
   const handleDeploy = async (projectId) => {
     try {
@@ -209,7 +227,7 @@ function App() {
         boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
       }}>
         <h1 style={{ margin: '0 0 15px 0', color: '#333' }}>
-          🐳 DockerHub Auto-Deploy System
+          🐳 AutoDock Auto-Deploy System
         </h1>
         {status && (
           <div style={{ 
